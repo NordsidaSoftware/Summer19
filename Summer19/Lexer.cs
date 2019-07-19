@@ -74,6 +74,7 @@ namespace Summer19
                     case ')': { Tokens.Add(new Token(TokenType.RPAREN)); break; }
                     case '"': { Tokens.Add(new Token(TokenType.APOSTROPHE)); break; }
                     case ';': { Tokens.Add(new Token(TokenType.SEMICOLON)); break; }
+                    case '<': { Tokens.Add(new Token(TokenType.LESS)); break; }
                     case '=': { Tokens.Add(new Token(Match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL)); break; }
                     case '!': { Tokens.Add(new Token(Match('=') ? TokenType.NOT_EQUAL : TokenType.NOT)); break; }
                 }

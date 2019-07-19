@@ -16,6 +16,7 @@ namespace Summer19
 {
     class Program
     {
+        public static Interpreter interpreter = new Interpreter();
         static void Main(string[] args)
         {
             if (args.Length  > 1 ) { Console.WriteLine("Error! Usage Summer19 <sourcefile>");
@@ -56,7 +57,9 @@ namespace Summer19
                 Expr expression = pars.parse(lex.Tokens);
                 PrettyPrint pp = new PrettyPrint();
                 Console.WriteLine(pp.print(expression));
-             
+
+               
+                interpreter.interpret(expression);
             }
             else { PresentErrors(lex); }
         }

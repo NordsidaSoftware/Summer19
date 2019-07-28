@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Summer19
 {
-    public class PrettyPrint:IVisitor<string>
+    public class PrettyPrint:IExprVisitor<string>
     {
         public string VisitBinary(Binary binary)
         {

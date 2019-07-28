@@ -19,7 +19,8 @@
         GREATER_EQUAL,
         LESS,
         LESS_EQUAL,
-        EOF
+        EOF,
+        PRINT
     }
     public class Token
     {

@@ -54,12 +54,12 @@ namespace Summer19
             Parser pars = new Parser();
             if (!lex.HasErrors)
             {
-                Expr expression = pars.parse(lex.Tokens);
-                PrettyPrint pp = new PrettyPrint();
-                Console.WriteLine(pp.print(expression));
+                List<Stmt> statements = pars.parse(lex.Tokens);
+                // PrettyPrint pp = new PrettyPrint();
+                // Kan legge inn en pp.print() her for debug
 
                
-                interpreter.interpret(expression);
+                interpreter.interpret(statements);
             }
             else { PresentErrors(lex); }
         }

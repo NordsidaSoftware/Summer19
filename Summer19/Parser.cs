@@ -37,6 +37,18 @@ namespace Summer19
     /// primary        -> NUMBER | STRING | "false" | "true" | "nil"
     ///                 | "(" expr ")"; 
 
+    /// ------------------------------------------------------------------------------
+    /// Bø i Vesterålen, 25 minutter i frihet som ikke smaker.
+    /// 
+    /// New syntax, now  with statements
+    /// 
+    /// program       -> statement* EOF ;
+    /// statement     -> exprStmt
+    ///                | printStmt;
+    ///                
+    /// exprStmt      -> expression ";" ;
+    /// printStmt     -> "print" expression ";";
+    /// 
     /// ==============================================================================
     /// </summary>
 
@@ -49,11 +61,25 @@ namespace Summer19
         Token previous { get { return Tokens[index - 1]; } }
 
         
-        internal Expr parse(List<Token> Tokens)
+        internal List<Stmt> parse(List<Token> Tokens)
         {
-            this.Tokens = Tokens;
-            return expression();
 
+            List<Stmt> statements = new List<Stmt>();
+            this.Tokens = Tokens;
+            while (!EOF)
+            {
+                try
+                {
+                    statements.Add(statement());
+                }
+                catch (ParseError error) { Console.WriteLine(error.ToString()); }
+            }
+            return statements;
+
+            #region testcode
+            // this.Tokens = Tokens;
+            // return expression();
+            #endregion
             #region VP TEST CODE
             /*
             ================== VISITOR PATTERN TEST CODE ===============
@@ -69,6 +95,28 @@ namespace Summer19
             ============================================================
             */
             #endregion
+        }
+
+        private Stmt statement()
+        {
+            if (match(TokenType.PRINT)) { return printStatement(); }
+            else return expressionStatement();
+        }
+
+        private Stmt expressionStatement()
+        {
+            Expr expr = expression();
+            Expect(TokenType.SEMICOLON, "Expect ';'");
+            ExpressionStmt expressionStmt = new ExpressionStmt(expr);
+            return expressionStmt;
+        }
+
+        private Stmt printStatement()
+        {
+            Expr expr = expression();
+            Expect(TokenType.SEMICOLON, "Expect ';'");
+            PrintStmt printStmt = new PrintStmt(expr);
+            return printStmt;
         }
 
         void Advance() { if (!EOF) index++; }
@@ -142,7 +190,7 @@ namespace Summer19
             if (match(TokenType.LPAREN))
             {
                 Expr expr = expression();
-                if (!Expect(TokenType.RPAREN)) { Console.WriteLine("ERROR"); }
+                if (!Expect(TokenType.RPAREN, "Expect ')'"))
                 return new Grouping(expr);
             }
             if (match(TokenType.WORD, TokenType.NUMBER))
@@ -153,10 +201,15 @@ namespace Summer19
             return new Literal(new Token(TokenType.SEMICOLON));  // NOO
         }
 
-        private bool Expect(TokenType type)
+        private bool Expect(TokenType type, string message)
         {
             if (check(type)) { Advance(); return true; }
-            return false;
+            throw (error(Tokens[index].type, message));
+        }
+
+        private ParseError error(TokenType type, string message)
+        {
+            throw new ParseError(type, message);
         }
 
         private bool check (TokenType type )

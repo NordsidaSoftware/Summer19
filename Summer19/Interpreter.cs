@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Summer19
 {
-    public class Interpreter:IVisitor<Object>
+    public class Interpreter : IExprVisitor<object>, IStmtVisitor<object>
     {
-        public void interpret (Expr expression)
+
+        public void interpret(List<Stmt> statements)
         {
             try
             {
-                Object value = evaluate(expression);
-                Console.WriteLine(Stringify(value));
-            } catch ( RuntimeError error ) { Console.WriteLine(error.ToString()); }
+                foreach (Stmt stmt in statements)
+                {
+                    Object value = execute(stmt);
+                }
+            }
+            catch (RuntimeError error) { Console.WriteLine(error.ToString()); }
+        }
+
+        private object execute(Stmt statement)
+        {
+            return statement.Accept(this);
         }
 
         private object evaluate(Expr expression)
@@ -35,7 +41,11 @@ namespace Summer19
             {
                 case TokenType.MINUS: { return (int)left - (int)right; }
                 case TokenType.STAR: { return (int)left * (int)right; }
-                case TokenType.DIVIDE: { return (int)left / (int)right; }
+                case TokenType.DIVIDE:
+                    {
+                        if ((int) right == 0 ) { throw new RuntimeError("Divide by 0"); }
+                        return (int)left / (int)right;
+                    }
                 case TokenType.PLUS:
                     {
                         if (left is String && right is String) { return (string)left + (string)right; }
@@ -50,8 +60,7 @@ namespace Summer19
 
 
             }
-
-            return "???"; // NOPE
+            throw new RuntimeError("Unreachable code...");
         }
 
         public object VisitGrouping(Grouping grouping)
@@ -75,7 +84,7 @@ namespace Summer19
         public object VisitUnary(Unary unary)
         {
             Object expr = unary.expr;
-            if (unary.opr.type is TokenType.MINUS )
+            if (unary.opr.type is TokenType.MINUS)
             {
                 return -(double)expr;
             }
@@ -89,9 +98,22 @@ namespace Summer19
 
         private bool IsTruthy(object expr)
         {
-            if (expr == null ) { return false; }
+            if (expr == null) { return false; }
             if (expr is Boolean) { return (Boolean)expr; }
             else return true;
+        }
+
+        public object visitExpresstionStmt(ExpressionStmt expressionStmt)
+        {
+            evaluate(expressionStmt.expression);
+            return null;  
+        }
+
+        public object visitPrintStmt(PrintStmt printStmt)
+        {
+            object value = evaluate(printStmt.expression);
+            Console.WriteLine(Stringify(value));
+            return null;
         }
     }
 }
